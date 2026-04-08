@@ -1,5 +1,5 @@
 """
-Bugcrowd Bug Bounty Target Scraper
+Trinetlayer- Bugcrowd Bug Bounty Target Scraper
 Scrapes all bug bounty programs from Bugcrowd and extracts their in-scope targets.
 Uses parallel browser workers for speed.
 Outputs results to CSV.
@@ -34,10 +34,8 @@ LISTING_URL = (
 OUTPUT_CSV = "bugcrowd_targets.csv"
 OUTPUT_JSON = "bugcrowd_targets.json"
 
-# Number of parallel browser instances for scraping targets
 WORKERS = 5
 
-# Bogus slugs to skip - these are Bugcrowd UI pages, not real programs
 BLACKLISTED_SLUGS = {
     "featured", "new", "recent", "promoted", "closed", "archived",
     "upcoming", "all", "search", "programs", "crowdstream",
@@ -45,14 +43,12 @@ BLACKLISTED_SLUGS = {
 
 print_lock = Lock()
 csv_lock = Lock()
-json_data = {}  # program_name -> [targets], flushed to disk after each worker
+json_data = {}  
 json_lock = Lock()
-
 
 def log(msg):
     with print_lock:
         print(msg)
-
 
 def create_driver(headless=True):
     opts = Options()
@@ -72,12 +68,10 @@ def create_driver(headless=True):
     driver.implicitly_wait(3)
     return driver
 
-
 def wait_for_page_load(driver, timeout=15):
     WebDriverWait(driver, timeout).until(
         lambda d: d.execute_script("return document.readyState") == "complete"
     )
-
 
 def is_valid_program_slug(slug):
     """Check if a slug looks like a real program, not a Bugcrowd UI page."""
@@ -92,8 +86,6 @@ def is_valid_program_slug(slug):
     if not re.match(r"^[a-zA-Z0-9][-a-zA-Z0-9]{1,100}$", slug):
         return False
     return True
-
-
 def switch_to_table_view(driver):
     try:
         table_btn = WebDriverWait(driver, 10).until(
@@ -106,7 +98,6 @@ def switch_to_table_view(driver):
         log("[+] Switched to table view")
     except TimeoutException:
         log("[!] Could not find table toggle, continuing anyway")
-
 
 def get_total_pages(driver):
     try:
@@ -152,7 +143,6 @@ def scrape_engagement_links(driver):
         if not href or not name:
             continue
 
-        # Extract the slug: /engagements/some-program -> some-program
         match = re.search(r"/engagements/([^/?#]+)", href)
         if not match:
             continue
@@ -166,7 +156,6 @@ def scrape_engagement_links(driver):
             links.append((full_url, name))
 
     return links
-
 
 def collect_all_engagement_links():
     """Use one browser to iterate all pages and collect engagement links."""
@@ -222,8 +211,6 @@ def scrape_targets_worker(work_item):
         wait_for_page_load(driver)
         time.sleep(1.5)
 
-        # Find only in-scope target rows (skip out-of-scope section)
-        # Bugcrowd pages have scope sections; use JS to find the in-scope table
         rows = driver.execute_script("""
             var sections = document.querySelectorAll('[class*="scope"]');
             // Look for a container/heading that indicates "In Scope"
@@ -248,7 +235,6 @@ def scrape_targets_worker(work_item):
         """)
 
         if not rows:
-            # Scroll to trigger lazy loading and retry
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
             time.sleep(1.5)
             rows = driver.execute_script("""
@@ -283,8 +269,6 @@ def scrape_targets_worker(work_item):
                 target_text = ""
                 target_url = ""
                 target_type = "unknown"
-
-                # Detect type from icon class
                 icon = cell.find_elements(By.CSS_SELECTOR, "span.bc-icon--target")
                 if icon:
                     tooltip = icon[0].get_attribute("data-tooltip-content")
@@ -297,7 +281,6 @@ def scrape_targets_worker(work_item):
                                 target_type = t
                                 break
 
-                # Get endpoint text
                 endpoint_el = cell.find_elements(
                     By.CSS_SELECTOR, "code.cc-rewards-link-table__endpoint"
                 )
@@ -309,7 +292,6 @@ def scrape_targets_worker(work_item):
                     else:
                         target_text = endpoint_el[0].text.strip()
 
-                # Hint URI
                 hint_el = cell.find_elements(
                     By.CSS_SELECTOR, ".bc-hint.cc-rewards-link-table__target-uri code"
                 )
@@ -334,7 +316,6 @@ def scrape_targets_worker(work_item):
             except Exception:
                 continue
 
-        # Also grab wildcards from in-scope section text only
         try:
             page_text = driver.execute_script("""
                 var headings = document.querySelectorAll('h4, h3, h2, [class*="heading"], [class*="title"]');
@@ -383,8 +364,6 @@ def scrape_targets_worker(work_item):
                     })
         except Exception:
             pass
-
-        # Flush to disk immediately so nothing is lost
         if targets:
             flush_csv_rows(targets)
             flush_json(program_name, targets)
@@ -406,7 +385,6 @@ def scrape_targets_worker(work_item):
 
     return program_name, targets
 
-
 def flush_csv_rows(rows):
     """Append rows to CSV immediately (thread-safe). Creates header if file is new."""
     with csv_lock:
@@ -425,7 +403,6 @@ def flush_csv_rows(rows):
                 domain = extract_domain_from_target(t["target"])
                 writer.writerow([t["program"], t["target"], domain, t["target_name"], t["type"]])
 
-
 def flush_json(program_name, targets):
     """Merge this program's targets into the JSON file on disk (thread-safe)."""
     with json_lock:
@@ -441,7 +418,6 @@ def flush_json(program_name, targets):
         with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=2, ensure_ascii=False)
 
-
 def extract_domain_from_target(target):
     target = target.strip()
     if target.startswith("*."):
@@ -453,14 +429,12 @@ def extract_domain_from_target(target):
         return target
     return target
 
-
 def main():
     print("=" * 60)
     print("  Bugcrowd Bug Bounty Target Scraper")
     print(f"  Workers: {WORKERS} parallel browsers")
     print("=" * 60)
 
-    # Phase 1: Collect all engagement links (single browser, fast)
     print("\n--- Phase 1: Collecting engagement links ---")
     engagement_links = collect_all_engagement_links()
     print(f"\n[+] Total programs found: {len(engagement_links)}")
@@ -469,11 +443,9 @@ def main():
         print("[!] No programs found. Bugcrowd may have changed their layout.")
         return
 
-    # Initialize CSV with header
     with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
         csv.writer(f).writerow(["Program", "Target (Raw)", "Domain / Wildcard", "Target Name", "Type"])
 
-    # Phase 2: Scrape targets in parallel — each worker saves to disk immediately
     print(f"\n--- Phase 2: Scraping targets ({WORKERS} workers, live-saving) ---")
     work_items = [
         (i, len(engagement_links), url, name)
@@ -491,7 +463,6 @@ def main():
                 item = futures[future]
                 log(f"[!] Worker crashed for {item[3]}: {e}")
 
-    # Summary
     print("\n" + "=" * 60)
     print("  SUMMARY")
     print("=" * 60)
@@ -500,7 +471,6 @@ def main():
     print(f"  CSV:  {OUTPUT_CSV}")
     print(f"  JSON: {OUTPUT_JSON}")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()

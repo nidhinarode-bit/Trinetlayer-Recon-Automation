@@ -24,9 +24,6 @@ IS_INTERACTIVE = sys.stdin.isatty()
 
 class TeeLogger:
     def __init__(self, log_path=None, terminal=None):
-        # Accept an explicit terminal so that the stderr TeeLogger stores the
-        # real sys.stderr instead of accidentally capturing sys.stdout (which
-        # has already been replaced by the stdout TeeLogger at that point).
         self.terminal = terminal if terminal is not None else sys.stdout
         self.log_file = None
         if log_path:
@@ -50,7 +47,6 @@ class TeeLogger:
     def close(self):
         if self.log_file:
             self.log_file.close()
-
 _running_procs = []
 
 def _cleanup_handler(signum, frame):
@@ -241,7 +237,6 @@ def parse_json_data(data):
                 _add_domain(raw, domains)
     return sorted(domains)
 
-
 def load_json_file(filepath):
     """Load and parse a JSON file, return sorted domain list."""
     if not os.path.exists(filepath):
@@ -255,7 +250,6 @@ def load_json_file(filepath):
         return []
     return parse_json_data(data)
 
-
 def get_json_domains():
     filepath = _safe_input("\n    Enter JSON file path: ", default="").strip().strip('"')
     domain_list = load_json_file(filepath)
@@ -266,7 +260,6 @@ def get_json_domains():
         if len(domain_list) > 20:
             print(f"    ... and {len(domain_list) - 20} more")
     return domain_list
-
 
 def _clean_domain(raw):
     """Clean and validate a raw domain/URL string. Returns cleaned domain or None."""
@@ -281,12 +274,10 @@ def _clean_domain(raw):
             return d
     return None
 
-
 def _add_domain(raw, domain_set):
     d = _clean_domain(raw)
     if d:
         domain_set.add(d)
-
 
 def parse_domains_from_text(text):
     """Parse domains from comma/newline separated text. Returns sorted list."""
@@ -392,27 +383,22 @@ def run_tool_with_timeout(cmd, startup_timeout=STARTUP_TIMEOUT):
         _running_procs.remove(proc)
     return output_lines
 
-
 def enum_subfinder(domain):
     """Subdomain enumeration using subfinder."""
     return run_tool_with_timeout(["subfinder", "-d", domain, "-silent", "-all"])
-
 
 def enum_assetfinder(domain):
     """Subdomain enumeration using assetfinder."""
     return run_tool_with_timeout(["assetfinder", "--subs-only", domain])
 
-
 def enum_findomain(domain):
     """Subdomain enumeration using findomain."""
     return run_tool_with_timeout(["findomain", "-t", domain, "-q"])
-
 
 def enum_chaos(domain):
     """Subdomain enumeration using chaos."""
     chaos_key = os.environ.get("CHAOS_KEY", "61a4286d-69b7-406c-b542-d3c9a7358027")
     return run_tool_with_timeout(["chaos", "-d", domain, "-silent", "-key", chaos_key])
-
 
 def enum_crtsh(domain):
     """Subdomain enumeration using crt.sh (no tool needed, uses API)."""
@@ -437,8 +423,6 @@ def enum_crtsh(domain):
     except Exception as e:
         print(f"      [!] crt.sh error: {e}")
         return []
-
-
 ENUM_TOOLS = {
     "subfinder": enum_subfinder,
     "assetfinder": enum_assetfinder,
@@ -446,7 +430,6 @@ ENUM_TOOLS = {
     "chaos": enum_chaos,
     "crt.sh": enum_crtsh,  
 }
-
 
 def enumerate_subdomains(domain, available_tools):
     """Run all available tools for a single domain, merge & dedup results."""
@@ -472,7 +455,6 @@ def enumerate_subdomains(domain, available_tools):
 
     print(f"  [+] {domain}: {len(all_subs)} unique subdomains after dedup")
     return all_subs
-
 
 def enumerate_all_domains(domains, available_tools):
     """Run subdomain enumeration for all target domains."""
@@ -582,9 +564,6 @@ def run_nuclei(live_file, output_dir):
             text=True,
         )
         _running_procs.append(proc)
-
-        # Nuclei sends findings to stdout and stats/progress to stderr.
-        # Read both in separate threads to avoid pipe deadlocks.
         def _read_nuclei_stderr():
             try:
                 for line in proc.stderr:
@@ -739,9 +718,6 @@ Examples:
     args = parser.parse_args()
 
     if args.log_file:
-        # Snapshot the real streams BEFORE replacing them; otherwise the
-        # stderr TeeLogger would store TeeLogger-stdout as its terminal,
-        # chaining writes and causing every line to be printed twice.
         _real_stdout = sys.stdout
         _real_stderr = sys.stderr
         sys.stdout = TeeLogger(args.log_file, terminal=_real_stdout)
@@ -832,14 +808,12 @@ Examples:
     if not subdomains:
         print("[!] No subdomains found. Exiting.")
         return
-
-  
+ 
     live_urls, live_file = run_httpx(subdomains, output_dir)
 
     if not live_urls:
         print("[!] No live subdomains found. Skipping nuclei.")
-    else:
-       
+    else:     
         run_nuclei(live_file, output_dir)
 
     generate_report(domains, subdomains, live_urls, output_dir)
@@ -848,7 +822,6 @@ Examples:
     print("  RECON COMPLETE")
     print(f"  Results: {output_dir}")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()
