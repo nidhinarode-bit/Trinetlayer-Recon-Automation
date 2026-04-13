@@ -518,7 +518,7 @@ def run_httpx(subdomains, output_dir):
 
     return live_urls, live_file
 
-def run_nuclei(live_file, output_dir):
+def run_nuclei(live_file, output_dir, domains=None):
     """Run nuclei scan on live subdomains."""
     print("\n" + "=" * 60)
     print("  PHASE 3: NUCLEI SCAN")
@@ -604,25 +604,69 @@ def run_nuclei(live_file, output_dir):
             print(f"    Medium   : {severity_counts['medium']}")
             print(f"    Low      : {severity_counts['low']}")
             print(f"    Info     : {severity_counts['info']}")
+
+            # Per-domain breakdown in console
+            if domains and len(domains) > 1:
+                print(f"\n[+] Per-domain breakdown:")
+                for d in domains:
+                    d_findings = [f for f in findings if _match_domain(
+                        next((p for p in reversed(f.strip().split()) if "://" in p or "." in p), ""),
+                        [d]
+                    ) == d]
+                    if d_findings:
+                        print(f"    {d}: {len(d_findings)} finding(s)")
+                    else:
+                        print(f"    {d}: No nuclei findings")
+
             print(f"[+] Text results : {nuclei_output}")
             print(f"[+] JSON results : {nuclei_json}")
         else:
             print("\n[*] Nuclei scan complete: no findings")
+            if domains:
+                for d in domains:
+                    print(f"    {d}: No nuclei findings")
 
     except FileNotFoundError:
         print("[!] nuclei not found. Install: go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest")
     except Exception as e:
         print(f"[!] Nuclei error: {e}")
 
+def _match_domain(url_or_host, domains):
+    """Return which target domain a URL/subdomain belongs to, or None."""
+    host = url_or_host.lower().replace("https://", "").replace("http://", "").split("/")[0].split(":")[0]
+    for d in sorted(domains, key=len, reverse=True):
+        if host == d or host.endswith("." + d):
+            return d
+    return None
+
+
 def generate_report(domains, subdomains, live_urls, output_dir):
     """Generate a summary report."""
     report_file = os.path.join(output_dir, "recon_report.txt")
     nuclei_file = os.path.join(output_dir, "nuclei_results.txt")
 
-    nuclei_count = 0
+    nuclei_findings = []
     if os.path.exists(nuclei_file):
         with open(nuclei_file, "r", encoding="utf-8", errors="replace") as f:
-            nuclei_count = len([l for l in f.readlines() if l.strip()])
+            nuclei_findings = [l for l in f.readlines() if l.strip()]
+    nuclei_count = len(nuclei_findings)
+
+    # Build per-domain nuclei breakdown
+    domain_findings = {d: [] for d in domains}
+    unmatched_findings = []
+    for finding in nuclei_findings:
+        # Extract URL from nuclei output - typically last token or contains ://
+        parts = finding.strip().split()
+        matched = False
+        for part in reversed(parts):
+            if "://" in part or "." in part:
+                owner = _match_domain(part, domains)
+                if owner:
+                    domain_findings[owner].append(finding.strip())
+                    matched = True
+                    break
+        if not matched:
+            unmatched_findings.append(finding.strip())
     W = 68  
     def box_line(content, left="║", right="║"):
         return f"  {left} {content.ljust(W)}{right}\n"
@@ -677,6 +721,36 @@ def generate_report(domains, subdomains, live_urls, output_dir):
         f.write(sec_line(f"  Subdomains Found .... {str(len(subdomains)).rjust(6)}"))
         f.write(sec_line(f"  Live Hosts (200) .... {str(len(live_urls)).rjust(6)}"))
         f.write(sec_line(f"  Nuclei Findings ..... {str(nuclei_count).rjust(6)}"))
+        f.write(sec_bottom())
+
+        # Per-domain nuclei results
+        f.write("\n")
+        f.write(sec_top())
+        f.write(sec_line("NUCLEI RESULTS BY DOMAIN"))
+        f.write(sec_mid())
+        for d in domains:
+            findings_for_d = domain_findings.get(d, [])
+            if findings_for_d:
+                severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
+                for finding in findings_for_d:
+                    fl = finding.lower()
+                    for sev in severity_counts:
+                        if f"[{sev}]" in fl:
+                            severity_counts[sev] += 1
+                            break
+                sev_parts = []
+                for sev in ["critical", "high", "medium", "low", "info"]:
+                    if severity_counts[sev] > 0:
+                        sev_parts.append(f"{sev}: {severity_counts[sev]}")
+                sev_str = ", ".join(sev_parts)
+                f.write(sec_line(f"  {d}"))
+                f.write(sec_line(f"    {len(findings_for_d)} finding(s) ({sev_str})"))
+            else:
+                f.write(sec_line(f"  {d}"))
+                f.write(sec_line(f"    No nuclei findings for this domain"))
+        if unmatched_findings:
+            f.write(sec_line(f"  [unmatched]"))
+            f.write(sec_line(f"    {len(unmatched_findings)} finding(s) could not be mapped to a domain"))
         f.write(sec_bottom())
 
         f.write("\n")
@@ -814,7 +888,7 @@ Examples:
     if not live_urls:
         print("[!] No live subdomains found. Skipping nuclei.")
     else:     
-        run_nuclei(live_file, output_dir)
+        run_nuclei(live_file, output_dir, domains)
 
     generate_report(domains, subdomains, live_urls, output_dir)
 
