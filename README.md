@@ -1,3 +1,5 @@
+<div align="center">
+
 ```
   __________  _____   ________________    _____  ____________
  /_  __/ __ \/  _/ | / / ____/_  __/ /   /   \ \/ / ____/ __ \
@@ -6,86 +8,129 @@
 /_/ /_/ |_/___/_/ |_/_____/ /_/ /_____/_/  |_/_/_____/_/ |_|
 ```
 
-<div align="center">
-
 # RECON AUTOMATION TOOL
 
 ### Automated Reconnaissance Pipeline for Cybersecurity Professionals & Bug Bounty Hunters
 
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
-[![Nuclei](https://img.shields.io/badge/Nuclei-v3.3.7-4A90D9?style=flat-square&logo=nuclei&logoColor=white)](https://github.com/projectdiscovery/nuclei)
-[![httpx](https://img.shields.io/badge/httpx-v1.6.9-orange?style=flat-square)](https://github.com/projectdiscovery/httpx)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=flat-square)](.)
-[![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)](.)
-[![Trinetlayer](https://img.shields.io/badge/Trinetlayer-Internal%20Tool-1a1f28?style=flat-square)](.)
+*Multi-stage enumeration to vulnerability reporting — single command execution.*
 
----
+<br>
 
-**`CRITICAL`** &nbsp; **`HIGH`** &nbsp; **`MEDIUM`** &nbsp; **`LOW`** &nbsp; **`INFO`**
+![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-3b82f6?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-1a1f28?style=for-the-badge)
 
----
+![Stars](https://img.shields.io/github/stars/nidhinarode-bit/Trinetlayer-Recon-Automation?style=flat-square&color=3b82f6)
+![Repo size](https://img.shields.io/github/repo-size/nidhinarode-bit/Trinetlayer-Recon-Automation?style=flat-square&color=3b82f6)
+![Last commit](https://img.shields.io/github/last-commit/nidhinarode-bit/Trinetlayer-Recon-Automation?style=flat-square&color=3b82f6)
 
-### 🔍 Scan Pipeline
+`CRITICAL` &nbsp; `HIGH` &nbsp; `MEDIUM` &nbsp; `LOW` &nbsp; `INFO`
 
-```
-[ Subdomain Enum ] → [ Dedup ] → [ httpx Probe ] → [ Live Filter 200 ] → [ Nuclei Scan ] → [ Report ]
-```
+**[· View Live Page ·](https://nidhinarode-bit.github.io/Trinetlayer-Recon-Automation/)**
 
 </div>
 
 ---
 
-## 01 · Features
+## Table of Contents
 
-| Module | Description |
-|---|---|
-| **Enumeration** | Multi-tool subdomain discovery via subfinder, assetfinder, findomain, chaos, and crt.sh with automatic deduplication across all sources |
-| **Vulnerability Scanning** | Nuclei with automatic template selection (`-as`), all severities, configurable rate limiting, dual TXT + JSONL output |
-| **Live Host Probing** | httpx probing to identify live hosts. Full severity breakdown displayed after each scan completion |
-| **Flexible Input** | CLI args, text files, JSON files, interactive mode. Bugcrowd target scraping integration included |
-| **Structured Reporting** | Formatted scan summary reports. JSONL output for downstream SIEM or pipeline integration |
-| **VPS / CI Ready** | Non-interactive mode, log file output, graceful signal handling. Cross-platform: Windows, macOS, Linux |
-
----
-
-## 02 · Prerequisites
-
-- ![Python](https://img.shields.io/badge/-Python%203.8+-3776AB?style=flat-square&logo=python&logoColor=white)
-- ![Go](https://img.shields.io/badge/-Go%201.21+-00ADD8?style=flat-square&logo=go&logoColor=white)
-- ![Required](https://img.shields.io/badge/-httpx%20%26%20nuclei%20%E2%80%94%20mandatory-9b72e8?style=flat-square)
-
-Go 1.21+ is required for compiling and installing the core recon toolchain.  
-Ensure `~/go/bin` is on your `$PATH` before proceeding.
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture / Workflow](#architecture--workflow)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Screenshots / Demo](#screenshots--demo)
+- [Configuration](#configuration)
+- [Example Output](#example-output)
+- [Security Disclaimer](#security-disclaimer)
+- [Performance & Advantages](#performance--advantages)
+- [Future Improvements](#future-improvements)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
 
 ---
 
-## 03 · Installation
+## Overview
 
-### Step 1 — Clone the Repository
+Reconnaissance is the most time-consuming and repetitive phase of any security
+assessment. An analyst typically runs five or six separate tools by hand, copies
+output between them, removes duplicates manually, filters live hosts, and only
+then begins vulnerability scanning. The process is slow, error-prone, and hard
+to reproduce.
 
-```bash
-git clone <repository-url>
-cd "Recon automation"
+**Trinetlayer Recon Automation** wraps the entire recon phase in a single Python
+orchestrator. One command takes a target from raw domain to a structured
+vulnerability report, with every intermediate artifact saved to disk. It is built
+for bug bounty hunters, penetration testers, and security teams who need fast,
+consistent, and repeatable reconnaissance.
+
+---
+
+## Features
+
+- 🔍 **Multi-source subdomain enumeration** — combines subfinder, assetfinder, findomain, chaos, and crt.sh, then deduplicates across every source.
+- 🛡️ **Automated vulnerability scanning** — runs Nuclei with automatic template selection (`-as`) across all severity levels.
+- 🌐 **Live host probing** — uses httpx to filter discovered subdomains down to hosts responding with `200 OK`.
+- 📥 **Flexible input** — accepts CLI arguments, plain text files, JSON files, an interactive menu, or scraped Bugcrowd targets.
+- 📊 **Structured reporting** — generates a human-readable summary plus JSONL output for SIEM or downstream pipeline integration.
+- 🖥️ **VPS / CI ready** — non-interactive mode, log-file output, and graceful signal handling for unattended scans.
+- 💻 **Cross-platform** — runs on Windows, macOS, and Linux.
+
+---
+
+## Architecture / Workflow
+
+```
+[ Subdomain Enum ] → [ Dedup ] → [ httpx Probe ] → [ Live Filter (200) ] → [ Nuclei Scan ] → [ Report ]
 ```
 
-### Step 2 — Install Python Dependencies
+| Stage | What happens |
+| ----- | ------------ |
+| **1. Enumeration** | Runs all available subdomain tools against the target in sequence. |
+| **2. Deduplication** | Merges results from every source into one clean, unique list. |
+| **3. Probing** | httpx checks each subdomain for a live HTTP/HTTPS response. |
+| **4. Live filtering** | Keeps only hosts returning `200 OK` for the scanning phase. |
+| **5. Vulnerability scan** | Nuclei scans live hosts with auto-selected templates. |
+| **6. Reporting** | Findings written as TXT + JSONL, plus a formatted summary report. |
+
+---
+
+## Tech Stack
+
+| Category | Technologies |
+| -------- | ------------ |
+| **Language** | Python 3.8+ |
+| **Recon toolchain** | subfinder, assetfinder, findomain, chaos, httpx, Nuclei |
+| **Data sources** | crt.sh (certificate transparency), Bugcrowd |
+| **Runtime dependency** | Go 1.21+ (required to install the recon toolchain) |
+| **Python libraries** | See [`requirements.txt`](requirements.txt) |
+| **Output formats** | TXT, JSONL |
+
+---
+
+## Installation
+
+**Step 1 — Clone the repository**
+
+```bash
+git clone https://github.com/nidhinarode-bit/Trinetlayer-Recon-Automation.git
+cd Trinetlayer-Recon-Automation
+```
+
+**Step 2 — Install Python dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 3 — Install Recon Tools
+**Step 3 — Install the recon toolchain (Go 1.21+ required)**
 
-> **httpx** and **nuclei** are mandatory. subfinder, assetfinder, findomain, and chaos are optional but significantly improve coverage.
+> `httpx` and `nuclei` are mandatory. subfinder, assetfinder, findomain, and chaos are optional but strongly improve coverage.
 
-<details>
-<summary><b>🪟 Windows</b></summary>
-
-```powershell
-# 1. Install Go from https://go.dev/dl/ (.msi installer)
-# 2. Open a new terminal and run:
-
+```bash
 go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
 go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
 go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
@@ -93,176 +138,52 @@ go install -v github.com/tomnomnom/assetfinder@latest
 go install -v github.com/projectdiscovery/chaos-client/cmd/chaos@latest
 ```
 
-Install findomain: download the Windows binary from [github.com/Findomain/Findomain/releases](https://github.com/Findomain/Findomain/releases) and add it to PATH.
+Install **findomain** separately (`brew install findomain` on macOS, or download the
+release binary on Windows / Linux) and ensure `$(go env GOPATH)/bin` is on your `PATH`.
 
-> ⚠️ **PATH Configuration — Windows**  
-> If any tool shows `'command' is not recognized`, add `%USERPROFILE%\go\bin` to your system PATH.
-
-```powershell
-# Check Go bin path
-go env GOPATH
-
-# Add to PATH (run PowerShell as Administrator)
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";" + (go env GOPATH) + "\bin", "User")
-```
-
-</details>
-
-<details>
-<summary><b>🍎 macOS</b></summary>
+**Step 4 — Verify**
 
 ```bash
-# Install Go
-brew install go
-
-# Install recon tools
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-go install -v github.com/tomnomnom/assetfinder@latest
-go install -v github.com/projectdiscovery/chaos-client/cmd/chaos@latest
-
-# Install findomain
-brew install findomain
-```
-
-Add Go bin to PATH — append to `~/.zshrc` or `~/.bash_profile`:
-
-```bash
-export PATH=$PATH:$(go env GOPATH)/bin
-source ~/.zshrc
-```
-
-> ℹ️ **PATH Check:** Run `echo $PATH | tr ':' '\n' | grep go` — should show `/Users/<you>/go/bin`
-
-</details>
-
-<details>
-<summary><b>🐧 Linux / VPS (Ubuntu / Debian)</b></summary>
-
-```bash
-# Install Go
-sudo apt update && sudo apt install -y golang-go
-
-# Or install latest Go manually:
-# wget https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
-# sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
-# export PATH=$PATH:/usr/local/go/bin
-
-# Install recon tools
-go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-go install -v github.com/tomnomnom/assetfinder@latest
-go install -v github.com/projectdiscovery/chaos-client/cmd/chaos@latest
-
-# Install findomain
-wget https://github.com/Findomain/Findomain/releases/latest/download/findomain-linux.zip
-unzip findomain-linux.zip && chmod +x findomain
-sudo mv findomain /usr/local/bin/
-```
-
-```bash
-echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
-source ~/.bashrc
-```
-
-> ℹ️ **PATH Check:** Run `echo $PATH | tr ':' '\n' | grep go` — should show `/home/<you>/go/bin`
-
-</details>
-
-### Verify All Tools
-
-```bash
-python3 -c "import requests; print('requests:', requests.__version__)"
-go version
-httpx -version
-nuclei -version
-subfinder -version
-assetfinder -h
-findomain --version
-chaos -version
-```
-
-Expected output (version numbers may vary):
-
-```
-requests: 2.32.3
-go version go1.22.0 linux/amd64
-Current Version: v1.6.9
-Nuclei engine version: v3.3.7
-Current Version: v2.6.7
-Usage of assetfinder: ...
-Findomain version: 9.0.4
-Current Version: v0.5.2
+go version && httpx -version && nuclei -version
 ```
 
 ---
 
-## 04 · Usage
+## Usage
 
-### Interactive Mode — Windows / macOS
+**Interactive mode** (Windows / macOS):
 
 ```bash
 python recon.py
 ```
 
-Launches a menu to scrape Bugcrowd, enter domains manually, or load from a file.
-
-### CLI Mode — All Platforms
+**CLI mode** (all platforms):
 
 ```bash
 # Single domain
 python recon.py -d example.com
 
-# Multiple domains (comma-separated)
+# Multiple domains
 python recon.py -d example.com,target.org,test.io
 
-# Load from text file (one per line)
+# From a text file (one domain per line)
 python recon.py -dL domains.txt
 
-# Load from JSON file
+# From a JSON file
 python recon.py --json-file targets.json
 
-# Scrape Bugcrowd targets
+# Scrape targets from Bugcrowd
 python recon.py --bugcrowd
 
 # Custom output directory
 python recon.py -d example.com --output-dir /path/to/output
 ```
 
-### VPS Usage
-
-> Always use CLI arguments on a VPS (no interactive mode without TTY).  
-> Use `--log-file` to persist output across SSH disconnects.
-
-**Background with nohup:**
-```bash
-nohup python recon.py -d example.com --log-file recon.log &
-```
-
-**Inside tmux or screen:**
-```bash
-tmux new -s recon
-python recon.py -dL targets.txt --log-file scan.log
-# Ctrl+B, D to detach  |  tmux attach -t recon to reconnect
-```
-
-**Cron (scheduled scan):**
-```bash
-crontab -e
-
-# Daily scan at 02:00
-0 2 * * * cd /opt/recon-automation && python recon.py -dL targets.txt --log-file /var/log/recon.log
-```
-
----
-
-## 05 · CLI Reference
+### CLI Reference
 
 | Argument | Description |
-|---|---|
-| `-d`, `--domains` | Domain(s) comma-separated |
+| -------- | ----------- |
+| `-d`, `--domains` | Domain(s), comma-separated |
 | `-dL`, `--domain-list` | File with domains (one per line) |
 | `--json-file` | JSON file with targets/domains |
 | `--bugcrowd` | Scrape targets from Bugcrowd |
@@ -271,54 +192,35 @@ crontab -e
 
 ---
 
-## 06 · Output
+## Project Structure
 
-Results saved to `results/<domain>_<timestamp>/`
-
-| File | Description |
-|---|---|
-| `target_domains.txt` | Input domains |
-| `all_subdomains.txt` | All discovered subdomains (deduplicated) |
-| `httpx_output.txt` | Full httpx probe results with status codes |
-| `live_subdomains.txt` | Live hosts responding with 200 OK |
-| `nuclei_results.txt` | Nuclei vulnerability scan findings (text) |
-| `nuclei_results.jsonl` | Nuclei findings in structured JSON (one object per line) |
-| `recon_report.txt` | Formatted summary report |
-
----
-
-## 07 · JSON Input Formats
-
-The `--json-file` flag accepts multiple formats:
-
-**Flat list:**
-```json
-["example.com", "target.org"]
 ```
-
-**Object list:**
-```json
-[
-  {"domain": "example.com"},
-  {"domain": "target.org"}
-]
-```
-
-**Bugcrowd-style (grouped by program):**
-```json
-{
-  "program_name": [
-    {"domain": "*.example.com"},
-    {"domain": "target.org"}
-  ]
-}
+Trinetlayer-Recon-Automation/
+├── recon.py              # Main automation orchestrator
+├── bugcrowd_scraper.py   # Bugcrowd target scraper
+├── requirements.txt      # Python dependencies
+├── index.html            # Project landing page (GitHub Pages)
+├── .gitignore
+├── .gitattributes
+└── README.md             # This file
 ```
 
 ---
 
-## 08 · API Keys (Optional)
+## Screenshots / Demo
 
-Configure API keys for subfinder to expand subdomain coverage via third-party intelligence sources.
+> 📸 **Screenshots coming soon.** A terminal capture of a live scan and a sample
+> report will be added here. To contribute one, run a scan, save the image to an
+> `assets/` folder, and reference it as `![Demo](assets/demo.png)`.
+>
+> A live project page is available at
+> **[nidhinarode-bit.github.io/Trinetlayer-Recon-Automation](https://nidhinarode-bit.github.io/Trinetlayer-Recon-Automation/)**.
+
+---
+
+## Configuration
+
+**API keys for subfinder** (optional — expands subdomain coverage):
 
 ```yaml
 # ~/.config/subfinder/provider-config.yaml
@@ -330,58 +232,93 @@ virustotal:
   - YOUR_VIRUSTOTAL_KEY
 ```
 
-For chaos, export the environment variable:
+**API key for chaos:**
 
 ```bash
 export CHAOS_KEY=your-projectdiscovery-api-key
 ```
 
----
-
-## 09 · Project Structure
-
-```
-Recon automation/
-├── recon.py                 Main automation script
-├── bugcrowd_scraper.py      Bugcrowd target scraper
-├── requirements.txt         Python dependencies
-├── results/                 Scan output directory
-└── README.md                This file
-```
+Scan output paths are controlled by `--output-dir`; logging is controlled by `--log-file`.
 
 ---
 
-## 10 · Troubleshooting
+## Example Output
 
-> ❌ **"MISSING REQUIRED TOOLS: httpx, nuclei"**  
-> Go tools are not in your PATH. Run `echo $PATH` and ensure it includes `~/go/bin` or `$(go env GOPATH)/bin`.
+Results are saved to `results/<domain>_<timestamp>/`:
 
----
-
-> ⚠️ **httpx or nuclei not found after installation**  
-> Close and reopen your terminal, or run `source ~/.bashrc` (Linux) / `source ~/.zshrc` (macOS).
-
----
-
-> ℹ️ **crt.sh errors (502, timeout)**  
-> The crt.sh API is occasionally slow or down. This is handled gracefully and does not affect other tools.
-
----
-
-> ℹ️ **No live subdomains found**  
-> httpx filters for 200 OK responses only. The target may return 301, 403, etc. Check `httpx_output.txt` for all responses.
+| File | Description |
+| ---- | ----------- |
+| `target_domains.txt` | Input domains |
+| `all_subdomains.txt` | All discovered subdomains (deduplicated) |
+| `httpx_output.txt` | Full httpx probe results with status codes |
+| `live_subdomains.txt` | Live hosts responding with `200 OK` |
+| `nuclei_results.txt` | Nuclei findings (human-readable) |
+| `nuclei_results.jsonl` | Nuclei findings (structured JSON) |
+| `recon_report.txt` | Formatted summary report |
 
 ---
 
-> ❌ **Permission denied on VPS**  
-> Ensure Go binaries have execute permissions: `chmod +x ~/go/bin/*`
+## Security Disclaimer
+
+> ⚠️ **For authorized security testing only.**
+>
+> This tool performs active reconnaissance and vulnerability scanning. Use it
+> **exclusively** against systems you own or for which you hold explicit, written
+> permission to test. Unauthorized scanning is illegal in most jurisdictions and
+> may carry criminal penalties. The author accepts **no liability** for misuse or
+> for any damage resulting from use of this software.
 
 ---
+
+## Performance & Advantages
+
+- **One command instead of six** — replaces a manual multi-tool workflow with a single repeatable run.
+- **No manual deduplication** — cross-source merging is automatic.
+- **Reproducible** — every scan is timestamped and self-contained.
+- **Pipeline-friendly** — JSONL output drops straight into SIEM or CI workflows.
+- **Unattended operation** — non-interactive mode and log files support long VPS scans over SSH.
+
+---
+
+## Future Improvements
+
+- [ ] Port scanning stage (e.g. naabu) before HTTP probing
+- [ ] HTML / PDF report export in addition to TXT and JSONL
+- [ ] Resume capability for interrupted scans
+- [ ] Notification integrations (Slack / Discord / email) on scan completion
+- [ ] Dockerfile for one-command containerized deployment
+- [ ] Unit tests and CI pipeline
+
+---
+
+## Contributing
+
+Contributions are welcome:
+
+1. Fork the repository and create a feature branch.
+2. Keep changes focused on lawful, defensive, and educational use.
+3. Open a pull request with a clear description of the change.
+
+Bug reports and feature requests can be filed via [Issues](https://github.com/nidhinarode-bit/Trinetlayer-Recon-Automation/issues).
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
+
+---
+
+## Author
+
+**Nidhi Appasaheb Narode**
+
+- GitHub: [@nidhinarode-bit](https://github.com/nidhinarode-bit)
+- LinkedIn: *https://www.linkedin.com/in/nidhi-narode-u192005/*
 
 <div align="center">
+<br>
 
-**Trinetlayer** &nbsp;·&nbsp; Internal Tool &nbsp;·&nbsp; Proprietary
-
-Made by **Nidhi Appasaheb Narode** — AI Intern
+Made by **Nidhi Appasaheb Narode** — AI Intern TRINETLAYER
 
 </div>
