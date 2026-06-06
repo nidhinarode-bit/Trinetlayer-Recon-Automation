@@ -303,22 +303,4 @@ Bug reports and feature requests can be filed via [Issues](https://github.com/ni
 
 ---
 
-## License
-
-This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
-
----
-
-## Author
-
-**Nidhi Appasaheb Narode**
-
-- GitHub: [@nidhinarode-bit](https://github.com/nidhinarode-bit)
-- LinkedIn: *https://www.linkedin.com/in/nidhi-narode-u192005/*
-
-<div align="center">
-<br>
-
-Made by **Nidhi Appasaheb Narode** — AI Intern TRINETLAYER
-
 </div>
